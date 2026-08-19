@@ -14,6 +14,19 @@ v0.1.2：加入「開始抽籤」按鈕（不再一開機就自動抽），並�
 uv sync
 ```
 
+## 範例 Demo
+
+不想先建立真人名單也能直接試玩：`configs/members.example.yaml`、
+`configs/seats_layout.example.yaml` 與 `assets/members.example/` 已內建
+一組假頭貼，可直接執行：
+
+```bash
+uv run pick-seat-gui \
+  -c configs/members.example.yaml \
+  --layout configs/seats_layout.example.yaml \
+  --photos-dir assets/members.example
+```
+
 ## 建立本機設定資料
 
 實際姓名、抽籤偏好、座位版面與頭貼不納入版本控制（見 `.gitignore`）。第一次使用時先建立本機設定：

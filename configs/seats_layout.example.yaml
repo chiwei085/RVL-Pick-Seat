@@ -8,7 +8,7 @@ canvas:
   height: 1815
 
 boxes:
-  - seat: 7
+  - seat: null
     box: [9, 125, 204, 246]
   - seat: null
     box: [10, 412, 203, 246]
