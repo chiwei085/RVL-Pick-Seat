@@ -148,7 +148,11 @@ $$
 
 上述定義的具體算法如下。
 
-**演算法 1** $\mathrm{DraftOrder}(\mathcal M,\, (w_i)_{i\in\mathcal M},\, (P_i)_{i\in\mathcal M})$
+**演算法 1**
+
+$$
+\mathrm{DraftOrder}(\mathcal M,\ (w_i)_{i\in\mathcal M},\ (P_i)_{i\in\mathcal M})
+$$
 
 ```
 輸入: 成員集合 M，權重 (w_i)，偏好集合 (P_i)
@@ -201,7 +205,11 @@ $$
 $H_i$ 是偏好命中的指示變數；下方演算法與命題進一步確認 $\sigma$
 確實是良好定義（well-defined）的雙射。
 
-**演算法 2** $\mathrm{AssignSeats}(\pi,\, (P_i)_{i\in\mathcal M})$
+**演算法 2**
+
+$$
+\mathrm{AssignSeats}(\pi,\ (P_i)_{i\in\mathcal M})
+$$
 
 ```
 輸入: 抽籤順序 π = (π_1, …, π_n)，偏好集合 (P_i)
@@ -221,7 +229,7 @@ $H_i$ 是偏好命中的指示變數；下方演算法與命題進一步確認 $
 12 return σ, (H_i)_{i∈M}
 ```
 
-**命題（$\sigma$ 為雙射）.** 對所有 $1\le t\le n$，歸納假設 $\lvert R_{t-1}\rvert=n-t+1$
+**命題（σ 為雙射）.** 對所有 $1\le t\le n$，歸納假設 $\lvert R_{t-1}\rvert=n-t+1$
 （$t=1$ 時由 $R_0=\mathcal S$ 顯然成立）。第 3–9 行保證 $X_t\in R_{t-1}$，
 第 11 行令 $R_t=R_{t-1}\setminus\{X_t\}$，故 $\lvert R_t\rvert=n-t$，
 歸納成立；特別地 $R_n=\varnothing$。又因 $X_1,\ldots,X_n$ 兩兩相異
