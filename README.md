@@ -95,7 +95,7 @@ $$
 $$
 b(k)=
 \begin{cases}
-1, & n=1,\\[4pt]
+1, & n=1,\\
 n^{-\frac{k-1}{n-1}}, & n>1.
 \end{cases}
 $$
@@ -186,7 +186,7 @@ $$
 $$
 X_t\mid(\pi_t,R_{t-1})\sim
 \begin{cases}
-\mathop{\mathrm{Unif}}(A_t), & A_t\neq\varnothing,\\[4pt]
+\mathop{\mathrm{Unif}}(A_t), & A_t\neq\varnothing,\\
 \mathop{\mathrm{Unif}}(R_{t-1}), & A_t=\varnothing,
 \end{cases}
 $$
