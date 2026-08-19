@@ -4,6 +4,8 @@
 
 v0.1.1：GUI 版本，支援頭貼、座位版面設定檔、重新抽一次。
 
+v0.1.2：加入「開始抽籤」按鈕（不再一開機就自動抽），並補上類似手遊抽卡的動畫流程──開場提示、快速洗牌後漸漸放慢、逐一揭曉座位；同時重新設計座位卡片視覺（陰影、光暈、圓角、徽章）。
+
 ## 安裝
 
 使用 [uv](https://docs.astral.sh/uv/) 管理環境：
@@ -12,12 +14,13 @@ v0.1.1：GUI 版本，支援頭貼、座位版面設定檔、重新抽一次。
 uv sync
 ```
 
-## 建立本機成員資料
+## 建立本機設定資料
 
-實際姓名、抽籤偏好與頭貼不納入版本控制（見 `.gitignore`）。第一次使用時先建立本機設定：
+實際姓名、抽籤偏好、座位版面與頭貼不納入版本控制（見 `.gitignore`）。第一次使用時先建立本機設定：
 
 ```bash
 cp configs/members.example.yaml configs/members.yaml
+cp configs/seats_layout.example.yaml configs/seats_layout.yaml
 mkdir -p assets/members
 ```
 
@@ -53,9 +56,16 @@ uv run pick-seat-gui -c path/to/other_members.yaml  # 指定成員設定檔
 uv run pick-seat-gui --layout configs/seats_layout.yaml  # 指定座位版面設定檔
 ```
 
+## 字型
+
+結果圖與動畫使用套件內附的 Noto Sans TC Regular/Bold，不依賴作業系統
+已安裝的字型，因此在 Linux、Windows 與 macOS build 中會維持相同排版。
+字型依 SIL Open Font License 1.1 散布，授權全文位於
+`assets/fonts/OFL.txt`。
+
 ## 座位版面
 
-座位圖由 `configs/seats_layout.yaml` 定義（程式自己畫，不直接使用 `assets/seats.png`，該圖僅作版面參考）。每個格子是一個 `[x, y, w, h]` 區塊，`seat` 對應 `members.yaml` 中的座位編號；`seat: null` 代表該格子只是房間裡的裝飾、不參與本次抽籤。想調整座位圖形狀或增刪座位，直接編輯這個檔案即可。
+座位圖由本機的 `configs/seats_layout.yaml` 定義；初始範本位於 `configs/seats_layout.example.yaml`。程式自己畫座位圖，不直接使用 `assets/seats.png`，該圖僅作版面參考。每個格子是一個 `[x, y, w, h]` 區塊，`seat` 對應 `members.yaml` 中的座位編號；`seat: null` 代表該格子只是房間裡的裝飾、不參與本次抽籤。想調整座位圖形狀或增刪座位，直接編輯本機設定檔即可。
 
 ## 演算法
 
