@@ -131,7 +131,7 @@ $$
 對每位成員獨立抽取
 
 $$
-U_i\overset{\mathrm{i.i.d.}}{\sim}\operatorname{Unif}(0,1),
+U_i\overset{\mathrm{i.i.d.}}{\sim}\mathop{\mathrm{Unif}}(0,1),
 \qquad
 K_i=U_i^{1/p_i}.
 $$
@@ -182,12 +182,12 @@ $$
 $$
 X_t\mid(\pi_t,R_{t-1})\sim
 \begin{cases}
-\operatorname{Unif}(A_t), & A_t\neq\varnothing,\\[4pt]
-\operatorname{Unif}(R_{t-1}), & A_t=\varnothing,
+\mathop{\mathrm{Unif}}(A_t), & A_t\neq\varnothing,\\[4pt]
+\mathop{\mathrm{Unif}}(R_{t-1}), & A_t=\varnothing,
 \end{cases}
 $$
 
-其中 $\operatorname{Unif}(A)$ 表示有限集合 $A$ 上的離散均勻分布。完成
+其中 $\mathop{\mathrm{Unif}}(A)$ 表示有限集合 $A$ 上的離散均勻分布。完成
 本輪後，定義
 
 $$
@@ -236,10 +236,10 @@ $$
 T_i=-\log K_i=\frac{-\log U_i}{p_i}.
 $$
 
-因為 $-\log U_i\sim\operatorname{Exp}(1)$，所以
+因為 $-\log U_i\sim\mathop{\mathrm{Exp}}(1)$，所以
 
 $$
-T_i\sim\operatorname{Exp}(p_i),
+T_i\sim\mathop{\mathrm{Exp}}(p_i),
 $$
 
 且所有 $T_i$ 互相獨立。依 $K_i$ 遞減排序等價於依 $T_i$ 遞增排序，
