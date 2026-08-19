@@ -1,0 +1,20 @@
+[project]
+name = "rvl-pick-seat"
+version = "0.1.1"
+description = "Weighted-lottery seat picker"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "pyyaml>=6.0",
+    "pillow>=11.0",
+]
+
+[project.scripts]
+pick-seat-gui = "rvl_pick_seat.gui:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rvl_pick_seat"]

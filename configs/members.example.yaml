@@ -1,0 +1,32 @@
+# 座位共 N 個，編號固定為 1..N（N = 人數），不需另外設定。
+# preferences: 心儀座位編號，不可為空；沒有特別偏好時請列出全部座位。
+# photo: assets/members/ 內的頭貼檔名，選填；未提供時會使用預設頭貼。
+members:
+  - name: 成員 A
+    weight: 3
+    preferences: [1, 2]
+    # photo: member-a.jpg
+
+  - name: 成員 B
+    weight: 2
+    preferences: [3, 4]
+
+  - name: 成員 C
+    weight: 1
+    preferences: [1, 2, 3, 4, 5, 6, 7]
+
+  - name: 成員 D
+    weight: 1
+    preferences: [5]
+
+  - name: 成員 E
+    weight: 1
+    preferences: [1, 2, 3, 4, 5, 6, 7]
+
+  - name: 成員 F
+    weight: 1
+    preferences: [6, 7]
+
+  - name: 成員 G
+    weight: 1
+    preferences: [1, 2, 3, 4, 5, 6, 7]

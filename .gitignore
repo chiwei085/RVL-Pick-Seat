@@ -1,0 +1,9 @@
+# Local member data is specific to each deployment.
+/configs/members.yaml
+/assets/members/
+
+# Python / uv
+.venv/
+__pycache__/
+*.pyc
+
