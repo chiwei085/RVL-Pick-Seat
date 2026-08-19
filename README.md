@@ -43,7 +43,7 @@ members:
 uv run pick-seat-gui
 ```
 
-跳出視窗顯示座位圖，同時終端機會印出抽籤順序與最終結果的文字版。按「重新抽一次」可用新的亂數重抽。
+跳出視窗顯示座位圖。按「重新抽一次」可用新的亂數重抽。
 
 常用參數：
 
@@ -59,100 +59,230 @@ uv run pick-seat-gui --layout configs/seats_layout.yaml  # 指定座位版面設
 
 ## 演算法
 
-### 問題定義
+### 數學模型
 
-- **輸入**：座位集合 $\text{Seats} = \{1, \dots, N\}$；成員集合 $M = \{1, \dots, N\}$（人數 = 座位數）；每人權重 $w_i > 0$；每人心儀座位集合 $P_i \subseteq \text{Seats}$，且 $P_i \neq \emptyset$。
-- **輸出**：一個雙射 $\text{seat}: M \to \text{Seats}$（每人恰得一個座位），滿足
-  1. $w_i$ 越大，$i$ 抽到 $\text{seat}(i) \in P_i$ 的機率越高；
-  2. $|P_i|$ 越小，$i$ 抽到 $\text{seat}(i) \in P_i$ 的機率越高；
-  3. 其餘所有隨機性（同分者之間、心儀座位耗盡後的選擇）皆為均勻分布，不含額外偏誤。
+令成員數與座位數皆為 $n$，並記
 
-### 優先分數 (priority score)
+$$
+\mathcal M = \{1,\ldots,n\},
+\qquad
+\mathcal S = \{1,\ldots,n\}.
+$$
 
-對每個 $i \in M$，令 $k_i = |P_i|$，定義
+對每位成員 $i\in\mathcal M$，給定權重 $w_i>0$ 與非空偏好集合
+$P_i\subseteq\mathcal S$。演算法的輸出是一個隨機雙射
 
-$$\text{bonus}(k_i) = N^{-\frac{k_i - 1}{N - 1}} \qquad (N > 1；N=1 時 \text{bonus} = 1)$$
+$$
+\sigma:\mathcal M\longrightarrow\mathcal S,
+$$
 
-$$\text{priority}(i) = w_i \cdot \text{bonus}(k_i)$$
+其中 $\sigma(i)$ 表示成員 $i$ 最終取得的座位。
 
-$\text{bonus}$ 是 $k$ 的平滑遞減函數：$k=1$（心儀座位最專一）時取最大值 $1$；$k=N$（列出全部座位，等於沒有偏好）時取最小值 $1/N$，中間以幾何內插遞減——每多列一個心儀座位，扣掉的是「剩餘 bonus 的固定比例」而非固定量。
+### 優先權
 
-### Algorithm 1 — DRAFT-ORDER(M, priority)
+令 $k_i=\lvert P_i\rvert$。先定義偏好稀缺函數
 
-> 用加權隨機排列決定抽籤順序，*priority* 越高的人期望排名越前面，但整體仍是機率性的。
+$$
+b(k)=
+\begin{cases}
+1, & n=1,\\[4pt]
+n^{-\frac{k-1}{n-1}}, & n>1.
+\end{cases}
+$$
+
+成員 $i$ 的稀缺係數 $b_i$ 與抽籤優先權 $p_i$ 為
+
+$$
+b_i=b(k_i),
+\qquad
+p_i=w_i b_i.
+$$
+
+當 $n>1$ 時，$b(k)$ 單調遞減，且
+
+$$
+b(1)=1,
+\qquad
+b(n)=\frac{1}{n}.
+$$
+
+因此，只指定一席時不折減權重；列出全部座位時，權重會縮至原本的
+$1/n$。兩端之間採幾何內插，而且
+
+$$
+\frac{b(k+1)}{b(k)}=n^{-1/(n-1)},
+\qquad 1\leq k<n,
+$$
+
+所以每多列一席，稀缺係數都乘上相同的比例。
+
+### 抽籤順序
+
+對每位成員獨立抽取
+
+$$
+U_i\overset{\mathrm{i.i.d.}}{\sim}\operatorname{Unif}(0,1),
+\qquad
+K_i=U_i^{1/p_i}.
+$$
+
+令 $\pi=(\pi_1,\ldots,\pi_n)$ 為依 $K_i$ 由大到小排列所得的隨機排列，
+亦即
+
+$$
+K_{\pi_1}>K_{\pi_2}>\cdots>K_{\pi_n}.
+$$
+
+由於 $U_i$ 為連續隨機變數，平手事件的機率為零。$p_i$ 越大，$K_i$
+傾向越大，因此成員 $i$ 傾向在排列 $\pi$ 中較早出現。
+
+上述定義的具體算法如下。
+
+**演算法 1** $\mathrm{DraftOrder}(\mathcal M,\, (w_i)_{i\in\mathcal M},\, (P_i)_{i\in\mathcal M})$
 
 ```
-DRAFT-ORDER(M, priority)
+輸入: 成員集合 M，權重 (w_i)，偏好集合 (P_i)
+輸出: M 的隨機排列 π
+
 1  for each i ∈ M
-2      U[i] ← RANDOM(0, 1)                       ▷ i.i.d. Uniform(0,1)
-3      key[i] ← U[i] ^ (1 / priority(i))
-4  sort M into order = (i₁, …, iₙ) by key[·] in decreasing order
-5  return order
+2      k_i ← |P_i|
+3      p_i ← w_i · b(k_i)              ▷ b(·) 依「優先權」一節定義
+4      draw U_i ~ Unif(0, 1)，彼此獨立
+5      K_i ← U_i^(1/p_i)
+6  將 M 依 K_i 由大到小排序，得 π = (π_1, …, π_n)
+7  return π
 ```
 
-### Algorithm 2 — ASSIGN-SEATS(order, P)
+第 4–5 行對每位成員各自獨立抽樣、彼此不共用亂數，第 6 行的排序即為
+$\S$「抽籤順序的機率分布」中分析的隨機排列 $\pi$；該小節證明了此排序法
+之邊際與聯合分布皆有封閉形式（Plackett–Luce 分布），而非僅是「分數
+越高排越前面」的直覺敘述。
+
+### 座位指派
+
+令 $R_0=\mathcal S$ 為初始剩餘座位集合。在第 $t$ 輪，成員
+$\pi_t$ 尚可選擇的偏好座位為
+
+$$
+A_t=P_{\pi_t}\cap R_{t-1}.
+$$
+
+以 $X_t$ 表示本輪選出的座位，則
+
+$$
+X_t\mid(\pi_t,R_{t-1})\sim
+\begin{cases}
+\operatorname{Unif}(A_t), & A_t\neq\varnothing,\\[4pt]
+\operatorname{Unif}(R_{t-1}), & A_t=\varnothing,
+\end{cases}
+$$
+
+其中 $\operatorname{Unif}(A)$ 表示有限集合 $A$ 上的離散均勻分布。完成
+本輪後，定義
+
+$$
+\sigma(\pi_t)=X_t,
+\qquad
+H_{\pi_t}=\mathbf 1_{\{A_t\neq\varnothing\}},
+\qquad
+R_t=R_{t-1}\setminus\{X_t\}.
+$$
+
+$H_i$ 是偏好命中的指示變數；下方演算法與命題進一步確認 $\sigma$
+確實是良好定義（well-defined）的雙射。
+
+**演算法 2** $\mathrm{AssignSeats}(\pi,\, (P_i)_{i\in\mathcal M})$
 
 ```
-ASSIGN-SEATS(order, P)
-1  S ← Seats                                      ▷ 剩餘座位
+輸入: 抽籤順序 π = (π_1, …, π_n)，偏好集合 (P_i)
+輸出: 座位指派 σ: M → S，命中指示變數 (H_i)
+
+1  R_0 ← S
 2  for t ← 1 to n
-3      i ← order[t]
-4      A ← P[i] ∩ S
-5      if A ≠ ∅
-6          seat[i] ← RANDOM-CHOICE(A)              ▷ 均勻隨機
-7          hit[i] ← TRUE
-8      else
-9          seat[i] ← RANDOM-CHOICE(S)               ▷ 均勻隨機
-10         hit[i] ← FALSE
-11     S ← S − {seat[i]}
-12 return seat[·], hit[·]
+3      A_t ← P_{π_t} ∩ R_{t-1}
+4      if A_t ≠ ∅
+5          draw X_t ~ Unif(A_t)
+6          H_{π_t} ← 1
+7      else
+8          draw X_t ~ Unif(R_{t-1})
+9          H_{π_t} ← 0
+10     σ(π_t) ← X_t
+11     R_t ← R_{t-1} \ {X_t}
+12 return σ, (H_i)_{i∈M}
 ```
 
-### 正確性與機率計算
+**命題（$\sigma$ 為雙射）.** 對所有 $1\le t\le n$，歸納假設 $\lvert R_{t-1}\rvert=n-t+1$
+（$t=1$ 時由 $R_0=\mathcal S$ 顯然成立）。第 3–9 行保證 $X_t\in R_{t-1}$，
+第 11 行令 $R_t=R_{t-1}\setminus\{X_t\}$，故 $\lvert R_t\rvert=n-t$，
+歸納成立；特別地 $R_n=\varnothing$。又因 $X_1,\ldots,X_n$ 兩兩相異
+（每次都從尚未移除的集合中取出且立即移除），$\sigma$ 的值域恰為
+$\mathcal S$ 且無重複，故 $\sigma$ 是 $\mathcal M$ 到 $\mathcal S$ 的雙射。$\blacksquare$
 
-**引理 1（指數競賽）.** 設 $U_i$ 為獨立同分布的 $\text{Uniform}(0,1)$ 隨機變數，$\text{key}_i = U_i^{1/\text{priority}(i)}$，令 $E_i = -\ln \text{key}_i$。則 $E_i \sim \text{Exponential}(\text{priority}(i))$，且諸 $E_i$ 互相獨立。
+### 抽籤順序的機率分布
 
-*證明.* 由機率積分變換，$U_i \sim \text{Uniform}(0,1) \Rightarrow -\ln U_i \sim \text{Exponential}(1)$。令 $p_i = \text{priority}(i)$，則
+令
 
-$$E_i = -\ln \text{key}_i = -\tfrac{1}{p_i}\ln U_i = \tfrac{1}{p_i}(-\ln U_i)$$
+$$
+T_i=-\log K_i=\frac{-\log U_i}{p_i}.
+$$
 
-若 $X \sim \text{Exponential}(1)$，則 $X/p \sim \text{Exponential}(p)$（指數分布的尺度性質），故 $E_i \sim \text{Exponential}(p_i)$。各 $U_i$ 互相獨立，故各 $E_i$ 互相獨立。∎
+因為 $-\log U_i\sim\operatorname{Exp}(1)$，所以
 
-**引理 2（獨立指數分布的最小值）.** 若 $E_1, \dots, E_n$ 互相獨立，$E_i \sim \text{Exponential}(\lambda_i)$，則
+$$
+T_i\sim\operatorname{Exp}(p_i),
+$$
 
-$$\Pr[E_i = \min_j E_j] = \dfrac{\lambda_i}{\sum_j \lambda_j}$$
+且所有 $T_i$ 互相獨立。依 $K_i$ 遞減排序等價於依 $T_i$ 遞增排序，
+因此這個加權排列也可視為一場獨立的指數競賽。對任意非空集合
+$I\subseteq\mathcal M$ 及 $i\in I$，有
 
-這是機率論中「競賽時鐘」(competing clocks) 的標準結果。
+$$
+\mathbb P\!\left(T_i=\min_{j\in I}T_j\right)
+=\frac{p_i}{\displaystyle\sum_{j\in I}p_j}.
+$$
 
-**定理 1（抽籤順序的精確分布）.** DRAFT-ORDER 產生的順序 $(i_1, \dots, i_n)$ 服從 Plackett–Luce 分布：
+由指數分布的無記憶性，$\pi$ 服從 Plackett–Luce 分布。對任意排列
+$(i_1,\ldots,i_n)$，
 
-$$\Pr[\text{order} = (i_1, \dots, i_n)] = \prod_{t=1}^{n} \dfrac{\text{priority}(i_t)}{\sum_{s=t}^{n} \text{priority}(i_s)}$$
+$$
+\mathbb P\!\left(\pi=(i_1,\ldots,i_n)\right)
+=\prod_{t=1}^{n}
+\frac{p_{i_t}}{\displaystyle\sum_{s=t}^{n}p_{i_s}}.
+$$
 
-*證明.* 由引理 1，$\text{key}_i$ 遞減對應 $E_i$ 遞增，故「$\text{key}$ 最大」等價於「$E$ 最小」。由引理 2，第一位出線者是 $i_1$ 的機率為 $\text{priority}(i_1) / \sum_j \text{priority}(j)$。指數分布具無記憶性，扣除 $i_1$ 之後，剩餘的 $E_i\ (i \neq i_1)$ 仍是相同 rate 的獨立指數分布，故可對剩餘 $n-1$ 人歸納，得到上式。∎（此即 Efraimidis–Spirakis 加權隨機排列與「依剩餘權重比例序貫抽樣」等價的標準證明。）
+特別地，任意兩位成員 $i$ 與 $j$ 的相對先後機率為
 
-**推論 1（兩人賽局）.** 若僅有 $i, j$ 兩人搶同一個座位（例如兩人都只心儀同一格），則
+$$
+\mathbb P(i\prec_{\pi}j)=\frac{p_i}{p_i+p_j}.
+$$
 
-$$\Pr[i\ \text{先抽到那個座位}] = \dfrac{\text{priority}(i)}{\text{priority}(i) + \text{priority}(j)}$$
+這表示提高 $w_i$ 或縮小 $\lvert P_i\rvert$ 都會提高 $p_i$，進而增加
+成員 $i$ 早於其他成員抽籤的機率。最終能否命中偏好仍取決於各成員的
+偏好集合如何重疊，不能只由 $p_i$ 單獨決定。
 
-只要 $\text{priority}(i) > \text{priority}(j)$，$i$ 的中選機率必然大於 $1/2$——這精確對應設計目標中的條件 1、2。
+### 偏好命中機率
 
-**心儀座位命中機率.** 一般情況下，$i$ 是否命中心儀座位不只取決於他的抽籤名次，還取決於名次之前的人如何隨機選走座位（因為這決定了抽到 $i$ 時 $P_i$ 還剩多少座位）。令 $S_{t-1}$ 為第 $t$ 輪抽籤前剩餘座位集合（一個由前 $t-1$ 人隨機選位遞迴定義的隨機變數），則精確式為
+由全機率公式，成員 $i$ 的偏好命中機率為
 
-$$\Pr[i\ \text{命中心儀座位}] = \sum_{t=1}^{N} \Pr[i\ \text{排在第}\ t\ \text{位}] \cdot \Pr\!\big[P_i \cap S_{t-1} \neq \emptyset \mid i\ \text{排在第}\ t\ \text{位}\big]$$
+$$
+\mathbb P(H_i=1)
+=\sum_{t=1}^{n}
+\mathbb P(\pi_t=i)\,
+\mathbb P\!\left(
+P_i\cap R_{t-1}\neq\varnothing
+\,\middle|\,
+\pi_t=i
+\right).
+$$
 
-其中第一項可由定理 1 對所有排列取邊際機率求得，第二項則依賴 $S_{t-1}$ 的完整分布。由於狀態空間（排列數 $\times$ 座位子集數）隨 $N$ 指數成長，本專案不求封閉解，改用 Monte Carlo 模擬驗證方向性：
+第一項由 Plackett–Luce 分布決定；第二項則取決於前 $t-1$ 輪造成的
+隨機剩餘集合 $R_{t-1}$。因為它涉及抽籤排列與座位子集的聯合分布，
+一般情況下不會化成只含 $w_i$ 與 $\lvert P_i\rvert$ 的簡單公式。
 
-| 設定（5 席） | 命中機率 |
-|---|---|
-| weight=4, 心儀 1 席 | 65.2% |
-| weight=1, 心儀 1 席（同上情境的對照組） | 17.0% |
-| weight=1, 心儀 1 席 | 81.0% |
-| weight=1, 心儀 5 席（=無偏好） | 3.4% |
+### 複雜度
 
-（每組 20,000 次模擬；符合推論 1 與設計目標的方向性。）
-
-### 複雜度分析
-
-- `DRAFT-ORDER`：產生 $n$ 個 key 並排序，$\Theta(n \log n)$。
-- `ASSIGN-SEATS`：每輪對剩餘座位集合做交集與刪除，若以雜湊集合實作，平均 $O(n + \sum_i k_i)$，最差 $O(n^2)$。
-- 整體：$\Theta(n \log n) + O(n^2)$ worst case；對一般座位數（通常 $n < 100$）可忽略不計。
+產生 $n$ 個隨機鍵並排序需要 $\Theta(n\log n)$ 時間。若
+$k_i=\lvert P_i\rvert$，檢查所有偏好集合共需
+$\Theta\!\left(\sum_{i=1}^{n}k_i\right)$ 時間；目前實作在偏好座位耗盡時
+會排序剩餘座位，因此最壞時間複雜度為 $O(n^2\log n)$。不計輸入設定本身，
+演算法額外使用 $O(n)$ 空間。
