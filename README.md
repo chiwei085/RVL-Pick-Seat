@@ -256,7 +256,7 @@ $I\subseteq\mathcal M$ 及 $i\in I$，有
 
 $$
 \mathbb P\!\left(T_i=\min_{j\in I}T_j\right)
-=\frac{p_i}{\displaystyle\sum_{j\in I}p_j}.
+=\frac{p_i}{\displaystyle\sum\limits_{j\in I}p_j}.
 $$
 
 由指數分布的無記憶性，$\pi$ 服從 Plackett–Luce 分布。對任意排列
@@ -265,7 +265,7 @@ $(i_1,\ldots,i_n)$，
 $$
 \mathbb P\!\left(\pi=(i_1,\ldots,i_n)\right)
 =\prod_{t=1}^{n}
-\frac{p_{i_t}}{\displaystyle\sum_{s=t}^{n}p_{i_s}}.
+\frac{p_{i_t}}{\displaystyle\sum\limits_{s=t}^{n}p_{i_s}}.
 $$
 
 特別地，任意兩位成員 $i$ 與 $j$ 的相對先後機率為
@@ -284,7 +284,7 @@ $$
 
 $$
 \mathbb P(H_i=1)
-=\sum_{t=1}^{n}
+=\sum\limits_{t=1}^{n}
 \mathbb P(\pi_t=i)\,
 \mathbb P\!\left(
 P_i\cap R_{t-1}\neq\varnothing
@@ -301,6 +301,6 @@ $$
 
 產生 $n$ 個隨機鍵並排序需要 $\Theta(n\log n)$ 時間。若
 $k_i=\lvert P_i\rvert$，檢查所有偏好集合共需
-$\Theta\!\left(\sum_{i=1}^{n}k_i\right)$ 時間；目前實作在偏好座位耗盡時
+$\Theta\!\left(\sum\limits_{i=1}^{n}k_i\right)$ 時間；目前實作在偏好座位耗盡時
 會排序剩餘座位，因此最壞時間複雜度為 $O(n^2\log n)$。不計輸入設定本身，
 演算法額外使用 $O(n)$ 空間。
