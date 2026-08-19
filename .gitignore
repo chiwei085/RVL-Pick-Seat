@@ -1,9 +1,9 @@
-# Local member data is specific to each deployment.
+# Local member and seat-layout data is specific to each deployment.
 /configs/members.yaml
+/configs/seats_layout.yaml
 /assets/members/
 
 # Python / uv
 .venv/
 __pycache__/
 *.pyc
-
