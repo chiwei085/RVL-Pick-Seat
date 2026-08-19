@@ -36,23 +36,25 @@ def load_layout(path: str | Path) -> SeatLayout:
     width = canvas.get("width")
     height = canvas.get("height")
     if not width or not height:
-        raise ValueError(f"{path}: canvas.width / canvas.height 為必填")
+        raise ValueError(f"{path}: 'canvas.width' and 'canvas.height' are required")
 
     raw_boxes = raw.get("boxes") or []
     if not raw_boxes:
-        raise ValueError(f"{path}: boxes 為空或缺少")
+        raise ValueError(f"{path}: 'boxes' is missing or empty")
 
     boxes: list[Box] = []
     seen_seats: set[int] = set()
     for i, b in enumerate(raw_boxes):
         coords = b.get("box")
         if not coords or len(coords) != 4:
-            raise ValueError(f"{path}: 第 {i} 個 box 缺少合法的 [x, y, w, h]")
+            raise ValueError(
+                f"{path}: box at index {i} must contain a valid [x, y, w, h] value"
+            )
         x, y, w, h = coords
         seat = b.get("seat")
         if seat is not None:
             if seat in seen_seats:
-                raise ValueError(f"{path}: 座位編號 {seat} 在 boxes 中重複")
+                raise ValueError(f"{path}: seat {seat} is assigned to multiple boxes")
             seen_seats.add(seat)
         boxes.append(Box(x=x, y=y, w=w, h=h, seat=seat))
 

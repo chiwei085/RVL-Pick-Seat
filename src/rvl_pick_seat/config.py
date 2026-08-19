@@ -30,26 +30,27 @@ def load_config(path: str | Path) -> Config:
 
     raw_members = raw.get("members")
     if not raw_members:
-        raise ValueError(f"{path}: 'members' 為空或缺少")
+        raise ValueError(f"{path}: 'members' is missing or empty")
 
     members: list[Member] = []
     seen_names: set[str] = set()
     for i, m in enumerate(raw_members):
         name = m.get("name")
         if not name:
-            raise ValueError(f"{path}: 第 {i} 位成員缺少 name")
+            raise ValueError(f"{path}: member at index {i} is missing 'name'")
         if name in seen_names:
-            raise ValueError(f"{path}: 姓名重複 '{name}'")
+            raise ValueError(f"{path}: duplicate member name: '{name}'")
         seen_names.add(name)
 
         weight = m.get("weight")
         if weight is None or weight <= 0:
-            raise ValueError(f"{path}: '{name}' 的 weight 必須為正數")
+            raise ValueError(f"{path}: '{name}': 'weight' must be positive")
 
         preferences = tuple(m.get("preferences") or [])
         if not preferences:
             raise ValueError(
-                f"{path}: '{name}' 的 preferences 不可為空；沒有特別偏好請列出全部座位編號"
+                f"{path}: '{name}': 'preferences' must not be empty; "
+                "list all seat numbers when there is no preference"
             )
         photo = m.get("photo")
         members.append(
@@ -62,10 +63,12 @@ def load_config(path: str | Path) -> Config:
         invalid = set(m.preferences) - seat_ids
         if invalid:
             raise ValueError(
-                f"{path}: '{m.name}' 的 preferences 含有不存在的座位編號 {sorted(invalid)}"
-                f"（合法範圍為 1..{seat_count}）"
+                f"{path}: '{m.name}': 'preferences' contains unknown seat numbers "
+                f"{sorted(invalid)} (valid range: 1..{seat_count})"
             )
         if len(set(m.preferences)) != len(m.preferences):
-            raise ValueError(f"{path}: '{m.name}' 的 preferences 有重複座位編號")
+            raise ValueError(
+                f"{path}: '{m.name}': 'preferences' contains duplicate seat numbers"
+            )
 
     return Config(members=tuple(members), seat_count=seat_count)
