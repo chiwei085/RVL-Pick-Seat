@@ -6,6 +6,8 @@ v0.1.1：GUI 版本，支援頭貼、座位版面設定檔、重新抽一次。
 
 v0.1.2：加入「開始抽籤」按鈕（不再一開機就自動抽），並補上類似手遊抽卡的動畫流程──開場提示、快速洗牌後漸漸放慢、逐一揭曉座位；同時重新設計座位卡片視覺（陰影、光暈、圓角、徽章）。
 
+![demo](assets/demo/pick-seat-demo.gif)
+
 ## 安裝
 
 使用 [uv](https://docs.astral.sh/uv/) 管理環境：
@@ -16,9 +18,9 @@ uv sync
 
 ## 範例 Demo
 
-不想先建立真人名單也能直接試玩：`configs/members.example.yaml`、
-`configs/seats_layout.example.yaml` 與 `assets/members.example/` 已內建
-一組假頭貼，可直接執行：
+不想先建立真人名單也能直接試玩（上方動圖即為此範例資料的實際畫面）：
+`configs/members.example.yaml`、`configs/seats_layout.example.yaml` 與
+`assets/members.example/` 已內建一組假頭貼，可直接執行：
 
 ```bash
 uv run pick-seat-gui \
