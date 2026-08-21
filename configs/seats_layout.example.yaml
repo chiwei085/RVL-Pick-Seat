@@ -1,50 +1,62 @@
 # 座位地圖版面設定：像素座標取自 assets/seats.png（僅作為畫版面時的參考尺寸，
 # 實際繪圖時是我們自己重畫，不會直接使用該圖檔）。
 # canvas: 畫布尺寸（像素）
-# boxes: 每個格子的位置與大小 [x, y, w, h]，seat 為對應到 members.yaml 心儀座位編號的
-#        座位號碼；seat 留空(null)代表該格子只是房間裡的裝飾/非本次抽籤座位。
+# boxes: 每個格子的位置與大小 [x, y, w, h]。seat 為座位編號，每格都要填、且不可重複；
+#        in_lottery 預設為 true，設為 false 代表該座位不納入本次抽籤（僅顯示編號）。
 canvas:
   width: 2052
   height: 1815
 
 boxes:
-  - seat: null
+  - seat: 1
+    in_lottery: false
     box: [9, 125, 204, 246]
-  - seat: null
+  - seat: 2
+    in_lottery: false
     box: [10, 412, 203, 246]
-  - seat: null
+  - seat: 3
+    in_lottery: false
     box: [8, 699, 205, 245]
-  - seat: null
+  - seat: 4
+    in_lottery: false
     box: [9, 985, 205, 248]
-  - seat: null
+  - seat: 5
+    in_lottery: false
     box: [9, 1274, 203, 246]
-  - seat: null
+  - seat: 6
+    in_lottery: false
     box: [8, 1560, 205, 246]
 
-  - seat: 2
+  - seat: 7
     box: [428, 348, 314, 390]
-  - seat: 3
+  - seat: 8
     box: [428, 774, 313, 391]
-  - seat: 4
+  - seat: 9
     box: [428, 1210, 315, 391]
 
-  - seat: 1
+  - seat: 10
     box: [1000, 9, 478, 280]
-  - seat: null
+  - seat: 11
+    in_lottery: false
     box: [1533, 8, 480, 282]
-  - seat: null
+  - seat: 12
+    in_lottery: false
     box: [1001, 345, 479, 279]
-  - seat: null
+  - seat: 13
+    in_lottery: false
     box: [1536, 348, 478, 277]
 
-  - seat: 5
+  - seat: 14
     box: [1004, 1153, 479, 279]
-  - seat: 6
+  - seat: 15
     box: [1538, 1153, 480, 281]
 
-  - seat: null
+  - seat: 16
+    in_lottery: false
     box: [1008, 1564, 302, 180]
-  - seat: null
+  - seat: 17
+    in_lottery: false
     box: [1375, 1564, 299, 181]
-  - seat: null
+  - seat: 18
+    in_lottery: false
     box: [1744, 1564, 298, 182]
