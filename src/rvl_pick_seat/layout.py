@@ -12,7 +12,8 @@ class Box:
     y: int
     w: int
     h: int
-    seat: int | None  # None = decorative/unused cell, not part of the draw
+    seat: int  # seat number, always shown on the seat map
+    in_lottery: bool  # whether this seat takes part in the current draw
 
 
 @dataclass(frozen=True)
@@ -52,10 +53,12 @@ def load_layout(path: str | Path) -> SeatLayout:
             )
         x, y, w, h = coords
         seat = b.get("seat")
-        if seat is not None:
-            if seat in seen_seats:
-                raise ValueError(f"{path}: seat {seat} is assigned to multiple boxes")
-            seen_seats.add(seat)
-        boxes.append(Box(x=x, y=y, w=w, h=h, seat=seat))
+        if seat is None:
+            raise ValueError(f"{path}: box at index {i} is missing 'seat'")
+        if seat in seen_seats:
+            raise ValueError(f"{path}: seat {seat} is assigned to multiple boxes")
+        seen_seats.add(seat)
+        in_lottery = b.get("in_lottery", True)
+        boxes.append(Box(x=x, y=y, w=w, h=h, seat=seat, in_lottery=in_lottery))
 
     return SeatLayout(canvas_width=width, canvas_height=height, boxes=tuple(boxes))

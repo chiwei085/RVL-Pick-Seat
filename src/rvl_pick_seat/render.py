@@ -407,7 +407,10 @@ def _shadow_text_glow(canvas: Image.Image, cx: float, y: float, text: str, font:
 
 def _empty_box(canvas: Image.Image, draw: ImageDraw.ImageDraw, box: Box, top_margin: int) -> None:
     x, y0, w, h = box.x, box.y + top_margin, box.w, box.h
-    _panel(canvas, draw, (x, y0, x + w, y0 + h), radius=16, fill_rgba=EMPTY_CARD_BG, outline_rgb=EMPTY_CARD_BORDER, outline_width=2)
+    box_xyxy = (x, y0, x + w, y0 + h)
+    _panel(canvas, draw, box_xyxy, radius=16, fill_rgba=EMPTY_CARD_BG, outline_rgb=EMPTY_CARD_BORDER, outline_width=2)
+    font = _load_font(int(min(w, h) * 0.36), bold=True)
+    _draw_centered_text(draw, x + w / 2, y0 + h / 2, str(box.seat), font, MUTED_TEXT)
 
 
 def _draw_mystery_seat(
@@ -450,7 +453,7 @@ def render_idle_chart(
 
     for box in layout.boxes:
         x, y0, w, h = box.x, box.y + top_margin, box.w, box.h
-        if box.seat is None:
+        if not box.in_lottery:
             _empty_box(canvas, draw, box, top_margin)
             continue
 
@@ -659,10 +662,14 @@ def render_result_chart(
     for box in layout.boxes:
         x, y0, w, h = box.x, box.y + top_margin, box.w, box.h
         box_xyxy = (x, y0, x + w, y0 + h)
-        assignment = by_seat.get(box.seat) if box.seat is not None else None
 
-        if assignment is None:
+        if not box.in_lottery:
             _empty_box(canvas, draw, box, top_margin)
+            continue
+
+        assignment = by_seat.get(box.seat)
+        if assignment is None:
+            _draw_mystery_seat(canvas, draw, box_xyxy, box.seat)
             continue
 
         t = reveal_progress.get(box.seat)

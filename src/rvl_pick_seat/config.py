@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -17,14 +18,10 @@ class Member:
 @dataclass(frozen=True)
 class Config:
     members: tuple[Member, ...]
-    seat_count: int
-
-    @property
-    def seats(self) -> tuple[int, ...]:
-        return tuple(range(1, self.seat_count + 1))
+    seats: tuple[int, ...]
 
 
-def load_config(path: str | Path) -> Config:
+def load_config(path: str | Path, seats: Iterable[int] | None = None) -> Config:
     path = Path(path)
     raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
 
@@ -58,17 +55,28 @@ def load_config(path: str | Path) -> Config:
         )
 
     seat_count = len(members)
-    seat_ids = set(range(1, seat_count + 1))
+    configured_seats = (
+        tuple(range(1, seat_count + 1)) if seats is None else tuple(seats)
+    )
+    if len(configured_seats) != seat_count:
+        raise ValueError(
+            f"{path}: number of lottery seats ({len(configured_seats)}) must match "
+            f"number of members ({seat_count})"
+        )
+    seat_ids = set(configured_seats)
+    if len(seat_ids) != len(configured_seats):
+        raise ValueError(f"{path}: lottery seat numbers must be unique")
+
     for m in members:
         invalid = set(m.preferences) - seat_ids
         if invalid:
             raise ValueError(
                 f"{path}: '{m.name}': 'preferences' contains unknown seat numbers "
-                f"{sorted(invalid)} (valid range: 1..{seat_count})"
+                f"{sorted(invalid)} (lottery seats: {sorted(seat_ids)})"
             )
         if len(set(m.preferences)) != len(m.preferences):
             raise ValueError(
                 f"{path}: '{m.name}': 'preferences' contains duplicate seat numbers"
             )
 
-    return Config(members=tuple(members), seat_count=seat_count)
+    return Config(members=tuple(members), seats=configured_seats)

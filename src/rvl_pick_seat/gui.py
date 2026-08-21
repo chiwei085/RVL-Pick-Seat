@@ -186,7 +186,10 @@ class SeatChartApp:
 
         # the outcome is decided up front (like a server-side gacha roll);
         # only the reveal is animated
-        config = load_config(self.config_path)
+        lottery_seats = (
+            box.seat for box in self.layout.boxes if box.in_lottery
+        )
+        config = load_config(self.config_path, seats=lottery_seats)
         rng = (
             random.Random(self.seed) if self.seed is not None else random.SystemRandom()
         )

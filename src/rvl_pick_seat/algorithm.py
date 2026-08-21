@@ -52,7 +52,8 @@ def _draft_order(members: tuple[Member, ...], seat_count: int, rng: random.Rando
 
 def run_draft(config: Config, rng: random.Random | None = None) -> list[Assignment]:
     rng = rng or random.SystemRandom()
-    order = _draft_order(config.members, config.seat_count, rng)
+    seat_count = len(config.seats)
+    order = _draft_order(config.members, seat_count, rng)
 
     available = set(config.seats)
     results: list[Assignment] = []
@@ -72,7 +73,7 @@ def run_draft(config: Config, rng: random.Random | None = None) -> list[Assignme
                 member=member,
                 seat=seat,
                 got_preference=got_preference,
-                priority=_priority(member, config.seat_count),
+                priority=_priority(member, seat_count),
             )
         )
 
