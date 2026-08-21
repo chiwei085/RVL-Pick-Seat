@@ -6,6 +6,8 @@ v0.1.1：GUI 版本，支援頭貼、座位版面設定檔、重新抽一次。
 
 v0.1.2：加入「開始抽籤」按鈕（不再一開機就自動抽），並補上類似手遊抽卡的動畫流程──開場提示、快速洗牌後漸漸放慢、逐一揭曉座位；同時重新設計座位卡片視覺（陰影、光暈、圓角、徽章）。
 
+v0.1.3：座位版面設定改為每格都要明確指定座位編號，並用 `in_lottery` 欄位標示是否納入本次抽籤；未納入抽籤的座位預設也會顯示編號，方便對照座位圖，已納入抽籤的座位則維持原本的顯示方式。
+
 ![demo](assets/demo/pick-seat-demo.gif)
 
 ## 安裝
@@ -49,8 +51,8 @@ members:
     photo: member-a.jpg  # 選填，對應 assets/members/ 底下的檔名
 ```
 
-- 座位編號固定為 `1..N`（N = 成員人數），不用另外設定。
-- `preferences` 不可為空；沒有特別偏好時請**列出全部座位編號**（這會被演算法視為懲罰，優先度最低，見下方演算法說明）。
+- 可抽座位由座位版面中未設定 `in_lottery: false` 的座位決定，數量必須與成員人數相同；座號不必是 `1..N`。
+- `preferences` 不可為空，且只能使用可抽座位的編號；沒有特別偏好時請**列出全部可抽座位編號**（這會被演算法視為懲罰，優先度最低，見下方演算法說明）。
 - `photo` 為選填；省略或找不到圖片時，GUI 會自動顯示姓名首字的預設頭貼。
 
 若要顯示頭貼，把圖片放進 `assets/members/`，並在對應成員加入 `photo` 欄位。
@@ -80,7 +82,7 @@ uv run pick-seat-gui --layout configs/seats_layout.yaml  # 指定座位版面設
 
 ## 座位版面
 
-座位圖由本機的 `configs/seats_layout.yaml` 定義；初始範本位於 `configs/seats_layout.example.yaml`。程式自己畫座位圖，不直接使用 `assets/seats.png`，該圖僅作版面參考。每個格子是一個 `[x, y, w, h]` 區塊，`seat` 對應 `members.yaml` 中的座位編號；`seat: null` 代表該格子只是房間裡的裝飾、不參與本次抽籤。想調整座位圖形狀或增刪座位，直接編輯本機設定檔即可。
+座位圖由本機的 `configs/seats_layout.yaml` 定義；初始範本位於 `configs/seats_layout.example.yaml`。程式自己畫座位圖，不直接使用 `assets/seats.png`，該圖僅作版面參考。每個格子是一個 `[x, y, w, h]` 區塊，`seat` 為座位編號，每一格都要填、且不可重複，圖上一律會顯示編號；納入本次抽籤的座位，其 `seat` 需對應 `members.yaml` 中的座位編號。`in_lottery`（選填，預設 `true`）設為 `false` 代表該座位不納入本次抽籤，僅顯示編號，不會出現在抽籤動畫或結果中。想調整座位圖形狀或增刪座位，直接編輯本機設定檔即可。
 
 ## 演算法
 
@@ -91,7 +93,7 @@ uv run pick-seat-gui --layout configs/seats_layout.yaml  # 指定座位版面設
 $$
 \mathcal M = \{1,\ldots,n\},
 \qquad
-\mathcal S = \{1,\ldots,n\}.
+\mathcal S = \{s_1,\ldots,s_n\}.
 $$
 
 對每位成員 $i\in\mathcal M$，給定權重 $w_i>0$ 與非空偏好集合
